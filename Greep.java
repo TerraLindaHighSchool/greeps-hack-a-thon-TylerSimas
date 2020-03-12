@@ -36,15 +36,38 @@ public class Greep extends Creature
         if (carryingTomato()) {
             if (atShip()) {
                 dropTomato();
+                turn(180);
             }
             else {
-                turnHome();
-                move();
+                if(atWater() || atWorldEdge())
+                {
+                   turnAround();
+                   move();
+                }
+                else
+                {
+                   turnHome();
+                   move();
+                   spit("red");
+                }
             }
         }
         else {
-            move();
             checkFood();
+            if (atWater() || atWorldEdge() || seePaint("orange")){
+                turnAround();
+                move();
+            }
+            else if(seePaint("red"))
+            {
+                followPaint();
+            }   
+            else 
+            if (seePaint("purple"))
+               {
+                turn(45);
+               }
+            move();
         }
     }
     
@@ -55,11 +78,19 @@ public class Greep extends Creature
     {
         // check whether there's a tomato pile here
         TomatoPile tomatoes = (TomatoPile) getOneIntersectingObject(TomatoPile.class);
-        if (tomatoes != null) {
-            loadTomato();
-            // Note: this attempts to load a tomato onto *another* Greep. It won't
-            // do anything if we are alone here.
-        }
+        // check whether there's another creature here
+        Creature anotherGreep = (Creature) getOneIntersectingObject(Creature.class);
+        if(tomatoes != null) {
+            spit("purple");
+            if(anotherGreep != null && tomatoes != null){
+                loadTomato();
+                turnHome();
+            }
+              
+            {
+              spit("red");
+            }
+        }  
     }
 
     /**
@@ -81,6 +112,32 @@ public class Greep extends Creature
         }
         else {
             return "greep.png";
+        }
+    }
+    
+    public void turnAround()
+    {
+        if(atWater() || atWorldEdge())
+        {
+            spit("orange");
+            turn(Greenfoot.getRandomNumber(60));
+        }
+    }
+   
+    public void getAwayFromOrange()
+    {
+        if(seePaint("orange"))
+        {
+            turn(Greenfoot.getRandomNumber(120) + 20);
+        }
+    }
+    
+    public void followPaint()
+    {
+        if(seePaint("red"))
+        {
+            turnHome();
+            turn(180);
         }
     }
 }
